@@ -23,6 +23,9 @@ class chart extends Component {
           data: [],
         },
       ],
+
+      totalFrequency: 0,
+      departments: [],
     };
   }
 
@@ -31,8 +34,16 @@ class chart extends Component {
     this.setState({ requests: response.data.requests });
 
     const categoryFrequencyMap = new Map();
+    const uniquedepartments = new Map();
+    let frequencie = 0;
+
     response.data.requests.forEach((request) => {
+
       const category = request.hotel.shortname;
+      const department = request.desk.name;
+      uniquedepartments.set(department, 1);
+      frequencie++;
+
       if (categoryFrequencyMap.has(category)) {
         categoryFrequencyMap.set(
           category,
@@ -43,10 +54,10 @@ class chart extends Component {
       }
     });
 
-
     const categories = Array.from(categoryFrequencyMap.keys());
     const frequencies = Array.from(categoryFrequencyMap.values());
-
+    this.setState({ departments: Array.from(uniquedepartments.keys()) });
+    this.setState({totalFrequency: frequencie});
 
     this.setState((prevState) => ({
       options: {
@@ -54,27 +65,18 @@ class chart extends Component {
         xaxis: {
           ...prevState.options.xaxis,
           categories: categories,
-        }
+        },
       },
     }));
 
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       series: [
         {
           ...prevState.series[0],
           data: frequencies,
-        }
-      ]
+        },
+      ],
     }));
-  }
-
-
-  renderRequestList() {
-    return this.state.requests.map((request) => (
-      <li key={request.id}>
-        ID: {request.id} - Name: {request.name}
-      </li>
-    ));
   }
 
   render() {
@@ -87,6 +89,17 @@ class chart extends Component {
           width={800}
           height={400}
         />
+
+        <div>Total Requests: {this.state.totalFrequency}</div>
+
+        <div>
+          List of unique department names across all Hotels:
+          {this.state.departments.map((request,index) => (
+            <span key={index}>
+              {request}, 
+            </span>
+          ))}
+        </div>
       </div>
     );
   }
